@@ -45,6 +45,7 @@ class PartnerUserController extends GetxController{
       _userId = sp.getString('uniqueId') ?? '';
       getPartners();
       getPartnerType();
+      getDistrict();
 
   }
 
@@ -91,6 +92,30 @@ class PartnerUserController extends GetxController{
 
     isLoading.value = false;
   }
+
+
+
+
+  Future<void> getDistrict() async {
+    isLoading.value = true;
+    http.Response response = await _apiService.getDistrict_ForAddQuote(_userId);
+
+    final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+    if (jsonResponse['success'] == true) {
+      List<dynamic> data = jsonResponse['data'];
+      print('data $data');
+      districtList.value = data
+          .map((item) => CommonItemModel.fromJson(item))
+          .toList();
+      print('districtList.value $districtList');
+    } else {
+      print('API error: ${jsonResponse['message']}');
+    }
+
+    isLoading.value = false;
+  }
+
 
 
 
