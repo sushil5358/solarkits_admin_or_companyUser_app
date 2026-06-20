@@ -386,6 +386,7 @@ class _QuickQuoteAdminState extends State<QuickQuoteAdmin> {
               if (choice == "Delete") {
               showDeleteQuotationDialog(context, quote.id);
               } else if (choice == "View Quote") {
+                // quote pdf
                 Get.to(()=>QuoteViewScreen(quoteNumber: quote.name,webUrl: quote.webViewUrl,pdfUrl: quote.pdfDownloadUrl,));
 
               } else if (choice == "Edit Survey") {
@@ -396,6 +397,7 @@ class _QuickQuoteAdminState extends State<QuickQuoteAdmin> {
                   ),
                 );
               } else if (choice == "Agreement") {
+                // agreement dialog
                 // _showAgreementFirstDialog(context, quote);
               }
             },

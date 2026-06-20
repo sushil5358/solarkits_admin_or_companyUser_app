@@ -2,6 +2,7 @@
 import 'package:admin_app_new/controller/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pinput/pinput.dart';
 
 import 'dashbord_screen.dart';
 
@@ -50,7 +51,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
                 const Text(
-                  'Welcome Back, Admin!',
+                  'Welcome Back ',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -117,10 +118,13 @@ class LoginScreen extends StatelessWidget {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async{
                       if (controller.mobileController.text.length == 10) {
-                        controller.loginWithNumber();
-                        // _showOtpDialog(context, mobileController.text);
+                       bool isResponse =  await controller.loginWithNumber();
+                       if(isResponse){
+                         _showOtpDialog(context, mobileController.text,controller);
+                       }
+
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -156,9 +160,8 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  void _showOtpDialog(BuildContext context, String mobileNumber) {
-    final List<TextEditingController> otpControllers = List.generate(6, (index) => TextEditingController());
-    final List<FocusNode> focusNodes = List.generate(6, (index) => FocusNode());
+  void _showOtpDialog(BuildContext context, String mobileNumber, LoginController controller) {
+    final TextEditingController pinController = TextEditingController();
 
     showDialog(
       context: context,
@@ -210,43 +213,58 @@ class LoginScreen extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
-            // OTP Input Fields Row
-            Flexible(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(6, (index) {
-                  return Container(
-                    width: 45,
-                    height: 55,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.green.shade300),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: TextFormField(
-                      controller: otpControllers[index],
-                      focusNode: focusNodes[index],
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        counterText: '',
-                      ),
-                      onChanged: (value) {
-                        if (value.length == 1 && index < 5) {
-                          focusNodes[index + 1].requestFocus();
-                        } else if (value.isEmpty && index > 0) {
-                          focusNodes[index - 1].requestFocus();
-                        }
-                      },
-                    ),
-                  );
-                }),
+            const SizedBox(height: 24),
+            // Swiggy-style OTP input
+            Pinput(
+              controller: pinController,
+              length: 6,
+              defaultPinTheme: PinTheme(
+                width: 48,
+                height: 56,
+                textStyle: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.green.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
+              focusedPinTheme: PinTheme(
+                width: 48,
+                height: 56,
+                textStyle: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.green.shade600, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              submittedPinTheme: PinTheme(
+                width: 48,
+                height: 56,
+                textStyle: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  border: Border.all(color: Colors.green.shade400),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onCompleted: (pin) {
+                // Optional: auto-verify when 6 digits are entered
+                // controller.verifyOTP(otp: pin);
+                // Navigator.pop(context);
+              },
             ),
             const SizedBox(height: 16),
-            // Resend OTP
             TextButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -256,6 +274,7 @@ class LoginScreen extends StatelessWidget {
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
+                // Resend OTP logic if needed
               },
               child: Text(
                 'Resend OTP',
@@ -272,9 +291,7 @@ class LoginScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                  onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Colors.grey[300]!),
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -292,19 +309,9 @@ class LoginScreen extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Verify OTP (for demo, accepting any 6 digits)
-                    String otp = otpControllers.map((c) => c.text).join();
-                    if (otp.length == 6) {
-                      Navigator.pop(context);
-                      Get.offAll(() => const DashboardScreen());
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please enter valid 6-digit OTP'),
-                          backgroundColor: Colors.red,
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                    controller.otp  = pinController.text;
+                    if (controller.otp .length == 6) {
+                      controller.verifyOTP();
                     }
                   },
                   style: ElevatedButton.styleFrom(

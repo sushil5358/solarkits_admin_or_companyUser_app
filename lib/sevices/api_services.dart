@@ -61,7 +61,7 @@ class ApiService {
 
 
   // String url = "https://test.sunnovativecrm.com/service/";
-  String url = "http://192.168.1.23:5000/api/";
+  String url = "http://192.168.1.6:5000/api/";
   String key = "1226";
 
   // https://test.sunnovativecrm.com/service/service_get_channel_partner_types.php?key=1226&s=201
@@ -152,7 +152,7 @@ class ApiService {
 
   Future<http.Response> loginWithNUmber(String number)async{
     http.Response response;
-    final uri = Uri.parse(url + 'company-users/mobile-login');
+    final uri = Uri.parse(url + 'company-users/send-otp');
     print('loginWithNUmber $uri');
     response = await http.post(
       headers: {
@@ -162,6 +162,27 @@ class ApiService {
       uri,
       body:  jsonEncode({
         "mobileNumber" : number,
+      }),
+
+
+    );
+    return response;
+  }
+
+
+  Future<http.Response> verifyOTP(String number,String otp)async{
+    http.Response response;
+    final uri = Uri.parse(url + 'company-users/verify-otp');
+    print('verifyOTP $uri');
+    response = await http.post(
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      uri,
+      body:  jsonEncode({
+        "mobileNumber": number,
+      "otp": otp,
       }),
 
 
@@ -721,21 +742,6 @@ class ApiService {
     response = await http.get(uri);
     return response;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

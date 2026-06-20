@@ -1267,12 +1267,10 @@ class _AddQuoteScreenState extends State<AddQuoteScreen> {
   ];
 
 
-
   @override
   void initState() {
     super.initState();
     print('quote id in initstate ${widget.quoteId}');
-
     controller = Get.put(AddQuotationCompanyuserController(quoteId: widget.quoteId));
     ever(controller.isLoading, (loading) {
       if (loading) {
@@ -1284,14 +1282,12 @@ class _AddQuoteScreenState extends State<AddQuoteScreen> {
       }
     });
 
-
   }
+
 
   @override
   void dispose() {
     Get.delete<AddQuotationCompanyuserController>();
-
-
     super.dispose();
   }
 
@@ -1546,15 +1542,17 @@ class _AddQuoteScreenState extends State<AddQuoteScreen> {
                                     child: Text(e.name),
                                   )).toList(),
                               onChanged: (val) {
-                                if (val != null)
+                                if (val != null) {
                                   controller.selectedSubProjectTypeIds.value =
                                       val.id;
+
                                 controller.getSolarBrands();
                                 controller.selectedBrandIds.value = '';
                                 controller.selectedTechnologyIds.value = '';
                                 controller.selectedPanelWattIds.value = '';
                                 controller.selectedNoOfPanels.value = '';
                                 controller.selectedKilowattIds.value = '';
+                                }
                               },
                             );
                           }),
@@ -1706,16 +1704,17 @@ class _AddQuoteScreenState extends State<AddQuoteScreen> {
                                     child: Text(e.name),
                                   )).toList(),
                               onChanged: (val) {
-                                if (val != null)
+                                if (val != null) {
                                   controller.selectedKilowattIds.value = val.id;
-                                print('selectedKilowattIds ${controller
-                                    .selectedKilowattIds.value}');
-                                controller.getComboKits();
-                                controller.getSolarPanels();
-                                controller.getInverter();
-                                controller.getBosKit();
-                                controller.getPartnerRates();
-                                controller.clearSelection();
+                                  print('selectedKilowattIds ${controller
+                                      .selectedKilowattIds.value}');
+                                  controller.getComboKits();
+                                  controller.getSolarPanels();
+                                  controller.getInverter();
+                                  controller.getBosKit();
+                                  controller.getPartnerRates();
+                                  controller.clearSelection();
+                                }
                               },
                             );
                           }),
@@ -2674,6 +2673,8 @@ class _AddQuoteScreenState extends State<AddQuoteScreen> {
       ],
     );
   }
+
+
 
   // ========== Original Form Field Builders (unchanged) ==========
   Widget _buildTextField({

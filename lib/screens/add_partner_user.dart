@@ -904,8 +904,6 @@ class _AddPartnerUserScreenState extends State<AddPartnerUserScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-
-
                         bool validate = controller.fKey.currentState?.validate() ?? false;
                         if(validate){
                           controller.addPartnerUser();

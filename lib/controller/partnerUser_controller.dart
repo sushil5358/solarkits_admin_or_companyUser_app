@@ -46,6 +46,7 @@ class PartnerUserController extends GetxController{
       getPartners();
       getPartnerType();
       getDistrict();
+      getCategory();
 
   }
 
@@ -109,6 +110,90 @@ class PartnerUserController extends GetxController{
           .map((item) => CommonItemModel.fromJson(item))
           .toList();
       print('districtList.value $districtList');
+    } else {
+      print('API error: ${jsonResponse['message']}');
+    }
+
+    isLoading.value = false;
+  }
+
+
+  Future<void> getCategory() async {
+    isLoading.value = true;
+    http.Response response = await _apiService.getCategory();
+
+    final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+    if (jsonResponse['success'] == true) {
+      List<dynamic> data = jsonResponse['data'];
+      print('data $data');
+      categoryList.value = data
+          .map((item) => CommonItemModel.fromJson(item))
+          .toList();
+      print('categoryList.value $categoryList');
+    } else {
+      print('API error: ${jsonResponse['message']}');
+    }
+
+    isLoading.value = false;
+  }
+
+
+  Future<void> getSubCategory() async {
+    isLoading.value = true;
+    http.Response response = await _apiService.getSubCategory(selectedCategoryId.value);
+
+    final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+    if (jsonResponse['success'] == true) {
+      List<dynamic> data = jsonResponse['data'];
+      print('data $data');
+      subCategoryList.value = data
+          .map((item) => CommonItemModel.fromJson(item))
+          .toList();
+      print('subCategoryList.value $subCategoryList');
+    } else {
+      print('API error: ${jsonResponse['message']}');
+    }
+
+    isLoading.value = false;
+  }
+
+
+  Future<void> getProjectType() async {
+    isLoading.value = true;
+    http.Response response = await _apiService.getProjectTypes(selectedSubProjectTypeId.value);
+
+    final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+    if (jsonResponse['success'] == true) {
+      List<dynamic> data = jsonResponse['data'];
+      print('data $data');
+      projectTypeList.value = data
+          .map((item) => CommonItemModel.fromJson(item))
+          .toList();
+      print('projectTypeList.value $projectTypeList');
+    } else {
+      print('API error: ${jsonResponse['message']}');
+    }
+
+    isLoading.value = false;
+  }
+
+
+  Future<void> getSubProjectType() async {
+    isLoading.value = true;
+    http.Response response = await _apiService.getSubProjectTypes(selectedProjectTypeId.value);
+
+    final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+    if (jsonResponse['success'] == true) {
+      List<dynamic> data = jsonResponse['data'];
+      print('data $data');
+      subProjectTypeList.value = data
+          .map((item) => CommonItemModel.fromJson(item))
+          .toList();
+      print('subProjectTypeList.value $subProjectTypeList');
     } else {
       print('API error: ${jsonResponse['message']}');
     }

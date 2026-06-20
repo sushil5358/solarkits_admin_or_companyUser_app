@@ -372,8 +372,6 @@ class AddQuotationCompanyuserController extends GetxController{
 
   }
 
-
-
   Future<void> getCustomizeKit()async{
     isLoading.value = true;
     http.Response response = await _apiService.getCustomizeKit(selectedPanelIds.value, selectedInverterIds.value, selectedBosKitIds.value, selectedNoOfPanels.value, selectedKilowattIds.value);

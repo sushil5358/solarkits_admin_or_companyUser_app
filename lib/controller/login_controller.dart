@@ -15,31 +15,45 @@ class LoginController extends GetxController{
   TextEditingController mobileController = TextEditingController();
 
   String userId = '';
+  String otp = '';
 
 
-  Future<void> loginWithNumber()async{
+  Future<bool> loginWithNumber()async{
     http.Response response;
      response = await  apiServices.loginWithNUmber(mobileController.text);
-     
-
        var extractData = jsonDecode(response.body);
        if(extractData['success'] == true || extractData['success'] == 'true'){
          print('extractData $extractData');
          showCustomSnackBar(Get.context!, message: extractData['message'], backgroundColor: Colors.green);
-         userId = extractData['user']['_id'];
-         print('userId $userId');
-        SharedPreferences sp = await SharedPreferences.getInstance();
-        sp.setString('uniqueId', userId);
-        sp.setBool('isLoggedIn', true);
-         Get.to(()=>DashboardScreen());
+
+         return true;
 
        }else{
          showCustomSnackBar(Get.context!, message: extractData['message'], backgroundColor: Colors.red);
+         return false;
        }
-       
-       
+
+  }
 
 
+
+  Future<void> verifyOTP()async{
+    http.Response response;
+    response = await  apiServices.verifyOTP(mobileController.text,otp);
+    var extractData = jsonDecode(response.body);
+    if(extractData['success'] == true || extractData['success'] == 'true'){
+      print('extractData verifydata  $extractData');
+      showCustomSnackBar(Get.context!, message: extractData['message'], backgroundColor: Colors.green);
+      SharedPreferences sp = await SharedPreferences.getInstance();
+      sp.setString('uniqueId', userId);
+      sp.setBool('isLoggedIn', true);
+      Get.offAll(()=>DashboardScreen());
+
+
+    }else{
+      showCustomSnackBar(Get.context!, message: extractData['message'], backgroundColor: Colors.red);
+
+    }
 
   }
 

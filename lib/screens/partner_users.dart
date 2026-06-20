@@ -65,16 +65,10 @@ class PartnerUsersScreen extends StatelessWidget {
   ];
 
   // Filter options
-  final List<String> userTypes = ['All', 'Channel Partner', 'Freelancer'];
+
 
 
   // Selected filters
-  final RxString selectedType = 'All'.obs;
-  final RxList<String> selectedDistricts = <String>[].obs;
-  final RxList<String> selectedCategories = <String>[].obs;
-  final RxList<String> selectedProjectTypes = <String>[].obs;
-  final RxList<String> selectedSubCategories = <String>[].obs;
-  final RxList<String> selectedSubProjectTypes = <String>[].obs;
 
   @override
   Widget build(BuildContext context) {
@@ -118,13 +112,14 @@ class PartnerUsersScreen extends StatelessWidget {
           // Filter Chips Section - User Types
           Obx(() {
             return Padding(
-              padding: const EdgeInsets.only(left: 8,right: 8),
+              padding: const EdgeInsets.only(left: 8, right: 8),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 child: Row(
                   children: controller.partnerTypeList.map((partner) {
-                    final isSelected = controller.selectedPartnerTypeId.value == partner.id;
+                    final isSelected = controller.selectedPartnerTypeId.value ==
+                        partner.id;
 
                     return Padding(
                       padding: const EdgeInsets.only(right: 8.0),
@@ -132,8 +127,11 @@ class PartnerUsersScreen extends StatelessWidget {
                         label: Text(
                           partner.name,
                           style: TextStyle(
-                            color: isSelected ? Colors.green[800] : Colors.black87,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected ? Colors.green[800] : Colors
+                                .black87,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
                           ),
                         ),
                         selected: isSelected,
@@ -145,9 +143,11 @@ class PartnerUsersScreen extends StatelessWidget {
 
                         // --- Square with minor rounded corners ---
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0), // Adjust the '8.0' to make it more or less rounded
+                          borderRadius: BorderRadius.circular(8.0),
+                          // Adjust the '8.0' to make it more or less rounded
                           side: BorderSide(
-                            color: isSelected ? Colors.green : Colors.grey[300]!,
+                            color: isSelected ? Colors.green : Colors
+                                .grey[300]!,
                             width: 1,
                           ),
                         ),
@@ -258,13 +258,13 @@ class PartnerUsersScreen extends StatelessWidget {
           ),
 
 
-
           const SizedBox(height: 12),
 
 
           Obx(() {
-            if(controller.isLoading.value){
-              return Expanded(child: Center(child: CircularProgressIndicator(color: Colors.green,),));
+            if (controller.isLoading.value) {
+              return Expanded(child: Center(
+                child: CircularProgressIndicator(color: Colors.green,),));
             }
             return Expanded(
               child: controller.partnerList.isEmpty
@@ -315,11 +315,6 @@ class PartnerUsersScreen extends StatelessWidget {
 
   void _showFilterBottomSheet(BuildContext context) {
     // Temporary selections
-    List<String> tempDistricts = List.from(selectedDistricts);
-    List<String> tempCategories = List.from(selectedCategories);
-    List<String> tempProjectTypes = List.from(selectedProjectTypes);
-    List<String> tempSubCategories = List.from(selectedSubCategories);
-    List<String> tempSubProjectTypes = List.from(selectedSubProjectTypes);
 
     showModalBottomSheet(
       context: context,
@@ -368,101 +363,139 @@ class PartnerUsersScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // District Multi-Select
-                          MultiSelectDialogField<CommonItemModel>(
-                            items: controller.districtList.map((district) {
-                              return MultiSelectItem(district, district.name);
-                            }).toList(),
-                            title: const Text('Select Districts'),
-                            // selectedItems: tempDistricts,
-                            onConfirm: (values) {
-
-                            },
-                            buttonText: const Text('Select Districts'),
-                            buttonIcon: const Icon(Icons.location_on),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                          Obx(() {
+                            List<CommonItemModel> selectedValue = controller.districtList.where((element) {
+                              return  controller.selectedDistrictId.value.contains(element.id);
+                            },).toList();
+                            return MultiSelectDialogField<CommonItemModel>(
+                              initialValue: selectedValue,
+                              items: controller.districtList.map((district) {
+                                return MultiSelectItem(district, district.name);
+                              }).toList(),
+                              title: const Text('Select Districts'),
+                              // selectedItems: tempDistricts,
+                              onConfirm: (values) {
+                                controller.selectedDistrictId.value = values.map((e) => e.id,).join(',');
+                                print('controller.selectedDistrictId.value ${controller.selectedDistrictId.value}');
+                              },
+                              buttonText: const Text('Select Districts'),
+                              buttonIcon: const Icon(Icons.location_on),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            );
+                          }),
                           const SizedBox(height: 20),
 
                           // Category Multi-Select
-                          MultiSelectDialogField<CommonItemModel>(
-                            items: controller.categoryList.map((category) {
-                              return MultiSelectItem(category, category.name);
-                            }).toList(),
-                            title: const Text('Select Categories'),
-                            // selectedItems: tempCategories,
-                            onConfirm: (values) {
-
-                            },
-                            buttonText: const Text('Select Categories'),
-                            buttonIcon: const Icon(Icons.category),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                          Obx(() {
+                            List<CommonItemModel> selectedValue = controller.categoryList.where((element) {
+                              return  controller.selectedCategoryId.value.contains(element.id);
+                            },).toList();
+                            return MultiSelectDialogField<CommonItemModel>(
+                              initialValue: selectedValue,
+                              items: controller.categoryList.map((category) {
+                                return MultiSelectItem(category, category.name);
+                              }).toList(),
+                              title: const Text('Select Categories'),
+                              // selectedItems: tempCategories,
+                              onConfirm: (values) {
+                                controller.selectedCategoryId.value = values.map((e) => e.id,).join(',');
+                                controller.getSubCategory();
+                              },
+                              buttonText: const Text('Select Categories'),
+                              buttonIcon: const Icon(Icons.category),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            );
+                          }),
                           const SizedBox(height: 20),
 
                           // Sub Category Multi-Select
-                          MultiSelectDialogField<CommonItemModel>(
-                            items: controller.subCategoryList.map((
-                                subCategory) {
-                              return MultiSelectItem(
-                                  subCategory, subCategory.name);
-                            }).toList(),
-                            title: const Text('Select Sub Categories'),
-                            // selectedItems: tempSubCategories,
-                            onConfirm: (values) {
+                          Obx(() {
+                            List<CommonItemModel> selectedValue = controller.subCategoryList.where((element) {
+                              return  controller.selectedSubCategoryId.value.contains(element.id);
+                            },).toList();
+                            return MultiSelectDialogField<CommonItemModel>(
+                              initialValue: selectedValue,
+                              items: controller.subCategoryList.map((
+                                  subCategory) {
+                                return MultiSelectItem(
+                                    subCategory, subCategory.name);
+                              }).toList(),
+                              title: const Text('Select Sub Categories'),
+                              // selectedItems: tempSubCategories,
+                              onConfirm: (values) {
+                                controller.selectedSubCategoryId.value = values.map((e) => e.id,).join(',');
+                                controller.getProjectType();
 
-                            },
-                            buttonText: const Text('Select Sub Categories'),
-                            buttonIcon: const Icon(
-                                Icons.subdirectory_arrow_right),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                              },
+                              buttonText: const Text('Select Sub Categories'),
+                              buttonIcon: const Icon(
+                                  Icons.subdirectory_arrow_right),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            );
+                          }),
                           const SizedBox(height: 20),
 
                           // Project Type Multi-Select
-                          MultiSelectDialogField(
-                            items: controller.projectTypeList.map((type) {
-                              return MultiSelectItem(type, type.name);
-                            }).toList(),
-                            title: const Text('Select Project Types'),
-                            // selectedItems: tempProjectTypes,
-                            onConfirm: (values) {
+                          Obx(() {
+                            List<CommonItemModel> selectedValue = controller.projectTypeList.where((element) {
+                              return  controller.selectedProjectTypeId.value.contains(element.id);
+                            },).toList();
+                            return MultiSelectDialogField(
+                              initialValue: selectedValue,
+                              items: controller.projectTypeList.map((type) {
+                                return MultiSelectItem(type, type.name);
+                              }).toList(),
+                              title: const Text('Select Project Types'),
+                              // selectedItems: tempProjectTypes,
+                              onConfirm: (values) {
+                                controller.selectedProjectTypeId.value = values.map((e) => e.id,).join(',');
+                                controller.getSubProjectType();
 
-                            },
-                            buttonText: const Text('Select Project Types'),
-                            buttonIcon: const Icon(Icons.business_center),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                              },
+                              buttonText: const Text('Select Project Types'),
+                              buttonIcon: const Icon(Icons.business_center),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            );
+                          }),
                           const SizedBox(height: 20),
 
                           // Sub Project Type Multi-Select
-                          MultiSelectDialogField(
-                            items: controller.subProjectTypeList.map((subType) {
-                              return MultiSelectItem(subType, subType.name);
-                            }).toList(),
-                            title: const Text('Select Sub Project Types'),
-                            // selectedItems: tempSubProjectTypes,
-                            onConfirm: (values) {
+                          Obx(() {
+                            List<CommonItemModel> selectedValue = controller.subProjectTypeList.where((element) {
+                              return  controller.selectedSubProjectTypeId.value.contains(element.id);
+                            },).toList();
+                            return MultiSelectDialogField(
+                              items: controller.subProjectTypeList.map((
+                                  subType) {
+                                return MultiSelectItem(subType, subType.name);
+                              }).toList(),
+                              title: const Text('Select Sub Project Types'),
+                              // selectedItems: tempSubProjectTypes,
+                              onConfirm: (values) {
+                                controller.selectedSubProjectTypeId.value = values.map((e) => e.id,).join(',');
 
-                            },
-                            buttonText: const Text('Select Sub Project Types'),
-                            buttonIcon: const Icon(Icons.electrical_services),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                              },
+                              buttonText: const Text(
+                                  'Select Sub Project Types'),
+                              buttonIcon: const Icon(Icons.electrical_services),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            );
+                          }),
                         ],
                       ),
                     ),
@@ -478,13 +511,13 @@ class PartnerUsersScreen extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () {
-                            setState(() {
-                              tempDistricts.clear();
-                              tempCategories.clear();
-                              tempProjectTypes.clear();
-                              tempSubCategories.clear();
-                              tempSubProjectTypes.clear();
-                            });
+                            controller.selectedDistrictId.value = '';
+                            controller.selectedCategoryId.value = '';
+                            controller.selectedSubCategoryId.value = '';
+                            controller.selectedProjectTypeId.value = '';
+                            controller.selectedSubProjectTypeId.value = '';
+                            controller.getPartners();
+
                           },
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(color: Colors.red.shade400),
@@ -501,11 +534,8 @@ class PartnerUsersScreen extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            selectedDistricts.value = tempDistricts;
-                            selectedCategories.value = tempCategories;
-                            selectedProjectTypes.value = tempProjectTypes;
-                            selectedSubCategories.value = tempSubCategories;
-                            selectedSubProjectTypes.value = tempSubProjectTypes;
+                            controller.getPartners();
+
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(

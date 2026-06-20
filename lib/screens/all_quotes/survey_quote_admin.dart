@@ -11,9 +11,12 @@ class SurveyQuoteAdmin extends StatefulWidget {
   State<SurveyQuoteAdmin> createState() => _SurveyQuoteAdminState();
 }
 
+
+
 class _SurveyQuoteAdminState extends State<SurveyQuoteAdmin> {
   @override
   Widget build(BuildContext context) {
+    // dummy survey quote data
     List<Map<String, dynamic>> surveyQuotes = [
       {
         'id': '4',
@@ -92,6 +95,8 @@ class _SurveyQuoteAdminState extends State<SurveyQuoteAdmin> {
     );
   }
 
+
+  // quote card
   Widget _buildQuoteCard(Map<String, dynamic> quote, bool isSurveyQuote) {
     return Stack(
       children: [
