@@ -193,6 +193,65 @@ class AdminQuotesController extends GetxController{
   }
 
 
+  Future<bool> quotationAgreement(String quoteId) async {
+    http.Response response = await _apiService.quotationAgreement(quoteId);
+    final Map<String,dynamic> jsonResponse =  jsonDecode(response.body);
+
+    if(jsonResponse['success'] == true){
+      showCustomSnackBar(Get.context!, message: jsonResponse['message'], backgroundColor: Colors.green);
+      return true;
+
+    }else{
+      print('erorr ${jsonResponse['success']}');
+      showCustomSnackBar(Get.context!, message: jsonResponse['message'], backgroundColor: Colors.red);
+      return false;
+    }
+
+
+
+  }
+
+
+
+  Future<void> quotationAgreementVerifyOtp(String quoteId,String otp) async {
+    http.Response response = await _apiService.quotationAgreementVerifyOtp(
+        quoteId, otp);
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+    if (jsonResponse['success'] == true) {
+      showCustomSnackBar(Get.context!, message: jsonResponse['message'],
+          backgroundColor: Colors.green);
+      getQuickQuote();
+    } else {
+      print('erorr ${jsonResponse['success']}');
+      showCustomSnackBar(Get.context!, message: jsonResponse['message'],
+          backgroundColor: Colors.red);
+    }
+
+  }
+
+
+
+  // create order api
+  Future<void> createOrder(String orderIds) async {
+    isLoading.value = true;
+    http.Response response = await _apiService.createOrder(userId, orderIds);
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+
+    if (jsonResponse['success'] == true) {
+      showCustomSnackBar(Get.context!, message: jsonResponse['message'],
+          backgroundColor: Colors.green);
+      isLoading.value = false;
+      getQuickQuote();
+    } else {
+      print('erorr ${jsonResponse['message']}');
+      showCustomSnackBar(Get.context!, message: jsonResponse['message'],
+          backgroundColor: Colors.red);
+    }
+    isLoading.value = false;
+  }
+
+
 
 
 }

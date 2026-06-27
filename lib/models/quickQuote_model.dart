@@ -26,6 +26,8 @@ class QuickQuoteModel {
   final ProjectType? projectType;
   final SubProjectType subProjectType;
   final ComboKit comboKit;
+  final AMCPlan amcPlan;
+  final AMCService amcService;
   final Brand brand;
   final Technology technology;
   final SolarPanelWatt solarPanelWatt;
@@ -58,6 +60,8 @@ class QuickQuoteModel {
   final String inverterBrandImage;
   final String webViewUrl;
   final String pdfDownloadUrl;
+  final bool agreementCompleted;
+  final String agreementUrl;
 
 
   QuickQuoteModel({
@@ -73,6 +77,8 @@ class QuickQuoteModel {
     this.projectType,
     required this.subProjectType,
     required this.comboKit,
+    required this.amcPlan,
+    required this.amcService,
     required this.brand,
     required this.technology,
     required this.solarPanelWatt,
@@ -105,6 +111,8 @@ class QuickQuoteModel {
     required this.inverterBrandImage,
     required this.webViewUrl,
     required this.pdfDownloadUrl,
+    required this.agreementCompleted,
+    required this.agreementUrl,
   });
 
   factory QuickQuoteModel.fromJson(Map<String, dynamic> json) {
@@ -122,7 +130,7 @@ class QuickQuoteModel {
           ? ProjectType.fromJson(json['projectType'])
           : null,
       subProjectType: SubProjectType.fromJson(json['subProjectType'] ?? {}),
-       comboKit: ComboKit.fromJson(json['comboKit'] ?? {}),
+      comboKit: ComboKit.fromJson(json['comboKit'] ?? {}),
       brand: Brand.fromJson(json['brand'] ?? {}),
       technology: Technology.fromJson(json['technology'] ?? {}),
       solarPanelWatt: SolarPanelWatt.fromJson(json['solarPanelWatt'] ?? {}),
@@ -151,14 +159,20 @@ class QuickQuoteModel {
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
       version: json['__v'] ?? 0,
       quoteNumber: json['quoteNumber'] ?? '',
-        panelBrandImage: json['panelBrandImage'] ?? '',
-       inverterBrandImage: json['inverterBrandImage'] ?? '',
-        webViewUrl: json['webViewUrl'] ?? '',
-       pdfDownloadUrl: json['pdfDownloadUrl'] ?? ''
+      panelBrandImage: json['panelBrandImage'] ?? '',
+      inverterBrandImage: json['inverterBrandImage'] ?? '',
+      webViewUrl: json['webViewUrl'] ?? '',
+      pdfDownloadUrl: json['pdfDownloadUrl'] ?? '',
+      amcPlan: AMCPlan.fromJson(json['amcPlan'] ?? {}),
+      amcService: AMCService.fromJson(json['amcServices'] ?? {}),
+      agreementCompleted: json['userAgress'] ?? false,
+      agreementUrl: json['agreementUrl'] ?? '',
     );
   }
 }
 
+
+// distict class
 class District {
   final String id;
   final String name;
@@ -172,6 +186,38 @@ class District {
     );
   }
 }
+
+class AMCPlan {
+  final String id;
+  final String name;
+
+  AMCPlan({required this.id, required this.name});
+
+  factory AMCPlan.fromJson(Map<String, dynamic> json) {
+    return AMCPlan(
+      id: json['_id'] ?? '',
+      name: json['planName'] ?? '',
+    );
+  }
+}
+
+class AMCService {
+  final String id;
+  final String name;
+  final int basePrice;
+
+  AMCService({required this.id, required this.name,required this.basePrice});
+
+  factory AMCService.fromJson(Map<String, dynamic> json) {
+    return AMCService(
+      id: json['_id'] ?? '',
+      name: json['serviceName'] ?? '',
+      basePrice: json['basePrice'] ?? 0,
+    );
+  }
+}
+
+
 
 
 class ComboKit {

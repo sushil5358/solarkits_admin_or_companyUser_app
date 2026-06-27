@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../appColors.dart';
 import '../../controller/admin_quotes_controller.dart';
@@ -25,52 +26,56 @@ class _QuickQuoteAdminState extends State<QuickQuoteAdmin> {
   @override
   Widget build(BuildContext context) {
 
-    return Column(
-      children: [
-        // All Quotes Tab
-        Obx(() {
-          if(controller.isLoading.value){
-            return Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.primaryBlue,)));
-
-          }
-          return controller.quickQuoteList.isEmpty
-              ? Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.receipt,
-                          size: 80,
-                          color: AppColors.lightGrey,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No quotes yet',
-                          style: TextStyle(fontSize: 18, color: AppColors.grey),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Tap the + button to add your first quote',
-                          style: TextStyle(fontSize: 12, color: AppColors.grey),
-                        ),
-                      ],
+    return RefreshIndicator(
+      onRefresh: () async{
+        controller.getQuickQuote();
+      },
+      child: Column(
+        children: [
+          // All Quotes Tab
+          Obx(() {
+            if(controller.isLoading.value){
+              return Expanded(child: Center(child: CircularProgressIndicator(color: AppColors.primaryBlue,)));
+            }
+            return controller.quickQuoteList.isEmpty
+                ? Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.receipt,
+                            size: 80,
+                            color: AppColors.lightGrey,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No quotes yet',
+                            style: TextStyle(fontSize: 18, color: AppColors.grey),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Tap the + button to add your first quote',
+                            style: TextStyle(fontSize: 12, color: AppColors.grey),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                )
-              : Expanded(
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(12),
-                    itemCount: controller.quickQuoteList.length,
-                    itemBuilder: (context, index) {
-                      final quote = controller.quickQuoteList[index];
-                      return _buildQuoteCard(quote, false);
-                    },
-                  ),
-                );
-        }),
-      ],
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(12),
+                      itemCount: controller.quickQuoteList.length,
+                      itemBuilder: (context, index) {
+                        final quote = controller.quickQuoteList[index];
+                        return _buildQuoteCard(quote, false);
+                      },
+                    ),
+                  );
+          }),
+        ],
+      ),
     );
   }
 
@@ -290,9 +295,17 @@ class _QuickQuoteAdminState extends State<QuickQuoteAdmin> {
                               color: AppColors.successGreen,
                             ),
                           ),
+                          // agreement and order button
                           ElevatedButton(
                             onPressed: () {
-                              // _showAgreementFirstDialog(context, quote);
+                              if(!quote.agreementCompleted){
+                                // agreement dialo
+                                _showAgreementDialog(context,quote);
+
+                              }else{
+                                controller.createOrder(quote.id);
+
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -305,8 +318,8 @@ class _QuickQuoteAdminState extends State<QuickQuoteAdmin> {
                                 vertical: 10,
                               ),
                             ),
-                            child: const Text(
-                              "Agreement",
+                            child:  Text(
+                              !quote.agreementCompleted ? 'Agreement' : 'Order',
                               style: TextStyle(fontSize: 13),
                             ),
                           ),
@@ -408,6 +421,272 @@ class _QuickQuoteAdminState extends State<QuickQuoteAdmin> {
   }
 
 
+  void _showAgreementDialog(BuildContext context, QuickQuoteModel quote) {
+    bool isAgreed = false;
+    WebViewController? webViewController;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.92,
+                height: MediaQuery.of(context).size.height * 0.8,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Title
+                    const Text(
+                      'Agreement',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryBlue,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // agreement webview
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: WebViewWidget(
+                          controller: webViewController ??= WebViewController()
+                            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+                            ..loadRequest(Uri.parse(quote.agreementUrl)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Checkbox + Verify button
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: isAgreed,
+                          onChanged: (value) => setState(() => isAgreed = value ?? false),
+                          activeColor: AppColors.primaryBlue,
+                        ),
+                        const Expanded(
+                          child: Text(
+                            'I agree with this agreement',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: isAgreed
+                              ? () async{
+                            // Close current dialog and open OTP dialog
+                            bool isValid =  await  controller.quotationAgreement(quote.id);
+                            Navigator.pop(context);
+
+                            if(isValid){
+                              /// TODO : showOtpDialog
+                              _showOtpDialog(context, quote);
+                            }
+
+
+                          }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryBlue,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text('Verify'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+
+  void _showOtpDialog(BuildContext context, QuickQuoteModel quote) {
+    List<TextEditingController> otpControllers = List.generate(6, (_) => TextEditingController());
+    List<FocusNode> otpFocusNodes = List.generate(6, (_) => FocusNode());
+    bool isOtpVerified = false;
+    String otp = '';
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Text(
+                'OTP Verification',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryBlue,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Enter the 6‑digit OTP sent to ${quote.phoneNumber}',
+                    style: const TextStyle(fontSize: 13, color: AppColors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  // 6 OTP text fields
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(6, (index) {
+                      return Flexible(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: SizedBox(
+                            width: 45,
+                            height: 55,
+                            child: TextFormField(
+                              controller: otpControllers[index],
+                              focusNode: otpFocusNodes[index],
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              maxLength: 1,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              decoration: InputDecoration(
+                                counterText: '',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: AppColors.lightGrey,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: AppColors.primaryBlue,
+                                    width: 2,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                              ),
+                              onChanged: (value) {
+                                // Auto-focus next field
+                                if (value.isNotEmpty && index < 5) {
+                                  FocusScope.of(context).requestFocus(
+                                    otpFocusNodes[index + 1],
+                                  );
+                                } else if (value.isEmpty && index > 0) {
+                                  FocusScope.of(context).requestFocus(
+                                    otpFocusNodes[index - 1],
+                                  );
+                                }
+                                // Check if all 6 digits are filled
+                                otp = otpControllers.map((c) => c.text).join();
+                                if (otp.length == 6) {
+                                  setState(() {
+                                    isOtpVerified = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    isOtpVerified = false;
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  // Resend OTP
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Didn't receive OTP? ",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.grey,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('OTP resent successfully!'),
+                              backgroundColor: AppColors.successGreen,
+                            ),
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 0),
+                        ),
+                        child: Text(
+                          'Resend OTP',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryBlue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.grey),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isOtpVerified
+                      ? () async{
+                    Navigator.pop(context);
+                    await controller.quotationAgreementVerifyOtp(quote.id,otp);
+
+                  }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Verify OTP'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   Future<void> showDeleteQuotationDialog(BuildContext context,String quoteId) {
     return showDialog<bool>(

@@ -61,8 +61,13 @@ class ApiService {
 
 
   // String url = "https://test.sunnovativecrm.com/service/";
-  String url = "http://192.168.1.6:5000/api/";
+  String url = "http://192.168.1.8:5000/api/";
   String key = "1226";
+
+  Map<String,String> head =  {
+  "Content-Type": "application/json",
+  "Accept": "application/json",
+  };
 
   // https://test.sunnovativecrm.com/service/service_get_channel_partner_types.php?key=1226&s=201
 
@@ -190,6 +195,47 @@ class ApiService {
     return response;
   }
 
+  Future<http.Response> quotationAgreement(String quoteId)async{
+    http.Response response;
+
+    final uri = Uri.parse(url + 'project-agreement/send-otp');
+    print('quotationAgreement $uri');
+    response = await http.post(
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        uri,
+        body: jsonEncode({
+          "quoteId": quoteId,
+        })
+    );
+    return response;
+  }
+
+
+
+  Future<http.Response> quotationAgreementVerifyOtp(String quoteId,String otp)async{
+    http.Response response;
+
+    final uri = Uri.parse(url + 'project-agreement/verify-otp');
+    print('quotationAgreement $uri');
+    response = await http.post(
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        uri,
+        body: jsonEncode({
+          "quoteId": quoteId,
+          "otp": otp,
+        })
+    );
+    return response;
+  }
+
+
+
 
   Future<http.Response> getCategory()async{
     http.Response response;
@@ -235,13 +281,78 @@ class ApiService {
   }
 
 
-  Future<http.Response> getprojectTypes()async{
+  Future<http.Response> getprojectTypes ()async{
     http.Response response;
     final uri = Uri.parse(url + 'mobile-metadata/project-types');
     print('getprojectTypes == $uri');
     response = await http.get(uri);
     return response;
   }
+
+
+  Future<http.Response> getMyProjectOrdersCompanyUser(String userId,String district,String category,String subCategory,String projectType,String subProjectType)async{
+    http.Response response;
+    final uri = Uri.parse(url + 'company-users/orders?userId=$userId&district=$district&category=$category&subCategory=$subCategory&projectType=$projectType&subProjectType=$subProjectType');
+    print('getMyProjectOrdersCompanyUser == $uri');
+    response = await http.get(uri);
+    return response;
+  }
+
+
+
+  Future<http.Response> createOrder(String userId,String orderId)async{
+    http.Response response;
+    final uri = Uri.parse(url + 'company-users/orders/create');
+    print('createOrder $orderId');
+    response = await  http.post(
+        uri,
+        headers: head,
+        body: jsonEncode({
+          "quoteId": orderId,
+          "userId": userId,
+        })
+
+
+    );
+    return response;
+
+  }
+
+
+  Future<http.Response> saveSurvey(Map<String, dynamic> surveyData) async {
+    final uri = Uri.parse(url + 'survey/save-building');
+    final response = await http.post(
+      uri,
+      headers: head,
+      body: jsonEncode(surveyData),
+    );
+    return response;
+  }
+
+  Future<http.Response> getBuildingtype()async{
+    http.Response response;
+    final uri = Uri.parse(url + 'quote-settings/building-types');
+    print('getBuildingtype == $uri');
+    response = await http.get(uri);
+    return response;
+  }
+
+  Future<http.Response> getInverterPositions()async{
+    http.Response response;
+    final uri = Uri.parse(url + 'quote-settings/inverter-positions');
+    print('getInverterPositions == $uri');
+    response = await http.get(uri);
+    return response;
+  }
+
+  Future<http.Response> getStructureType()async{
+    http.Response response;
+    final uri = Uri.parse(url + 'quote-settings/structure-types');
+    print('getStructureType == $uri');
+    response = await http.get(uri);
+    return response;
+  }
+
 
 
   Future<http.Response> addCompanyUser(

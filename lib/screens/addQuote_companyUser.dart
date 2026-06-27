@@ -1,5 +1,6 @@
 
-import 'package:admin_app_new/screens/unified_map.dart';
+
+import 'package:admin_app_new/screens/unfied_map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -809,7 +810,7 @@ class _AddQuoteScreenState extends State<AddquoteCompanyuser> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    Get.to(()=>UnifiedSurveyWrapper());
+                    Get.to(()=>UnifiedSurveyScreen(willQuote: 'no',));
                     // Navigate to Survey Map Screen
                     // Navigator.push(
                     //   context,
